@@ -14,7 +14,7 @@ to know how to get them click on the  #[ link ](https://github.com/ayushteke/sla
 ## watch this video for full instructions 
 # [video 1](https://www.youtube.com/watch?v=4Dq_yWxWtQQ) ( with SA accounts and mega.nz )
  
-# [video 2](https://www.youtube.com/watch?v=F58_LKXiZ-0) ( without SA accounts and mega.nz )
+# [video 2](https://www.youtube.com/watch?v=F58_LKXiZ-0) ( without SA accounts and no mega.nz )
   
    [YouTobe channel](https://www.youtube.com/channel/UCodj8yIUqFrM1VbnRbL0LHA) (for more such videos )
 
