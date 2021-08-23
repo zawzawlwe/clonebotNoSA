@@ -1,31 +1,27 @@
 import shutil, psutil
 import signal
 import os
+import asyncio
 
 from pyrogram import idle
 from bot import app
 from sys import executable
-from datetime import datetime
-import pytz
-import time
 
-from telegram import ParseMode, BotCommand
+from telegram import ParseMode
 from telegram.ext import CommandHandler
-from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS
+from wserver import start_server_async
+from bot import bot, IMAGE_URL, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, search, delete, speedtest, usage, mediainfo, count, config, updates
-
-now=datetime.now(pytz.timezone('Asia/Jakarta'))
+from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, torrent_search, delete, speedtest, count, config, updates
 
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
-    current = now.strftime('%Y/%m/%d %I:%M:%S %p')
     total, used, free = shutil.disk_usage('.')
     total = get_readable_file_size(total)
     used = get_readable_file_size(used)
@@ -35,7 +31,7 @@ def stats(update, context):
     cpuUsage = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    stats = f'<b>╭──「  ⭕️ BOT STATISTICS ⭕️  」</b>\n' \
+    stats = f'<b>╭──「⭕️ BOT STATISTICS ⭕️」</b>\n' \
             f'<b>│</b>\n' \
             f'<b>├  ⏰ Bot Uptime : {currentTime}</b>\n' \
             f'<b>├  💾 Total Disk Space : {total}</b>\n' \
@@ -57,8 +53,8 @@ This bot can mirror all your links to Google Drive!
 Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
     buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Repo", "https://github.com/ayushteke/slam_aria_mirror_bot_HEROKU")
-    buttons.buildbutton("Support Group", "https://t.me/AT_BOTs_support")
+    buttons.buildbutton("Repo", "https://github.com/ayushteke/slam_aria_mirror_bot")
+    buttons.buildbutton("Channel", "https://t.me/AT_BOTs")
     reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
     LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
     uptime = get_readable_time((time.time() - botStartTime))
@@ -66,9 +62,9 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
         if update.message.chat.type == "private" :
             sendMessage(f"Hey I'm Alive 🙂\nSince: <code>{uptime}</code>", context.bot, update)
         else :
-            update.effective_message.reply_photo(IMAGE_URL, start_string, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
+            sendMarkup(IMAGE_URL, start_string, context.bot, update, reply_markup)
     else :
-        sendMessage(f"Oops! you are not allowed to use me.", context.bot, update)
+        sendMarkup(f"Oops! You are not allowed to use me.</b>.", context.bot, update, reply_markup)
 
 
 def restart(update, context):
@@ -95,8 +91,9 @@ def log(update, context):
 def bot_help(update, context):
     help_string_adm = f'''
 /{BotCommands.HelpCommand}: To get this message
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive
+/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
 /{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
+/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
 /{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
 /{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive
 /{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive Links
@@ -118,17 +115,17 @@ def bot_help(update, context):
 /{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports
 /{BotCommands.ConfigMenuCommand}: Get Info Menu about bot config (Owner Only)
 /{BotCommands.UpdateCommand}: Update Bot from Upstream Repo (Owner Only)
-/{BotCommands.UsageCommand}: To see Heroku Dyno Stats (Owner & Sudo only)
 /{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file)
 /{BotCommands.ShellCommand}: Run commands in Shell (Terminal)
-/tshelp: Get help for Torrent search module
+/{BotCommands.ExecHelpCommand}: Get help for Executor module (Only Owner)
+/{BotCommands.TsHelpCommand}: Get help for Torrent search module
 '''
 
     help_string = f'''
 /{BotCommands.HelpCommand}: To get this message
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive
+/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
 /{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
+/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
 /{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
 /{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive
 /{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive Links
@@ -139,9 +136,7 @@ def bot_help(update, context):
 /{BotCommands.StatusCommand}: Shows a status of all the downloads
 /{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
 /{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file)
-/tshelp: Get help for Torrent search module
+/{BotCommands.TsHelpCommand}: Get help for Torrent search module
 '''
 
     if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
@@ -151,29 +146,34 @@ def bot_help(update, context):
 
 
 botcmds = [
-BotCommand(f'{BotCommands.HelpCommand}','Get Detailed Help'),
-BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
-BotCommand(f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
-BotCommand(f'{BotCommands.UnzipMirrorCommand}','Extract files'),
-BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
-BotCommand(f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
-BotCommand(f'{BotCommands.DeleteCommand}','Delete file from Drive'),
-BotCommand(f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
-BotCommand(f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as .tar'),
-BotCommand(f'{BotCommands.CancelMirror}','Cancel a task'),
-BotCommand(f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
-BotCommand(f'{BotCommands.ListCommand}','Searches files in Drive'),
-BotCommand(f'{BotCommands.StatusCommand}','Get Mirror Status message'),
-BotCommand(f'{BotCommands.StatsCommand}','Bot Usage Stats'),
-BotCommand(f'{BotCommands.PingCommand}','Ping the Bot'),
-BotCommand(f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
-BotCommand(f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
-BotCommand(f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
-BotCommand(f'/tshelp','Get help for Torrent search module')]
+        (f'{BotCommands.HelpCommand}','Get Detailed Help'),
+        (f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
+        (f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
+        (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
+        (f'{BotCommands.ZipMirrorCommand}','Start mirroring and upload as .zip'),
+        (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+        (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
+        (f'{BotCommands.DeleteCommand}','Delete file from Drive'),
+        (f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
+        (f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as .tar'),
+        (f'{BotCommands.CancelMirror}','Cancel a task'),
+        (f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
+        (f'{BotCommands.ListCommand}','Searches files in Drive'),
+        (f'{BotCommands.StatusCommand}','Get Mirror Status message'),
+        (f'{BotCommands.StatsCommand}','Bot Usage Stats'),
+        (f'{BotCommands.PingCommand}','Ping the Bot'),
+        (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
+        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
+    ]
 
 
 def main():
     fs_utils.start_cleanup()
+
+    if IS_VPS:
+        asyncio.get_event_loop().run_until_complete(start_server_async(SERVER_PORT))
+
     # Check if the bot is restarting
     if os.path.isfile(".restartmsg"):
         with open(".restartmsg") as f:
