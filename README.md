@@ -27,6 +27,10 @@ after this click on the below button 👇👇👇👇
 ## Features supported:
 
 - Mirroring direct download links to Google Drive
+- qBittorrent supported
+- selection of files before downloading torrent
+- Limiting size Torrent/Direct, Tar/Unzip, Mega, cloning Google Drive support
+- Stop duplicate cloning Google Drive & mirroring Mega support
 - Create Tar Google Drive folder
 - Mirroring Mega.nz links to Google Drive (In development stage)
 - Mirroring Uptobox.com links to Google Drive (Uptobox account must be premium)
@@ -43,7 +47,6 @@ after this click on the below button 👇👇👇👇
 - Limiting size Torrent/Direct, Mega, cloning Google Drive support
 - Mirror telegram files
 - Delete files from drive
-- Add stickers to your pack
 - Check Heroku dynos stats
 - Nyaa.si and Sukebei Torrent search
 - Shell and Executor
