@@ -2,7 +2,6 @@ from bot import aria2, DOWNLOAD_DIR, LOGGER
 from bot.helper.ext_utils.bot_utils import MirrorStatus
 from .status import Status
 
-
 def get_download(gid):
     return aria2.get_download(gid)
 
@@ -12,18 +11,17 @@ class AriaDownloadStatus(Status):
     def __init__(self, gid, listener):
         super().__init__()
         self.upload_name = None
-        self.is_archiving = False
         self.__gid = gid
         self.__download = get_download(self.__gid)
         self.__uid = listener.uid
         self.__listener = listener
         self.message = listener.message
-        self.last = None
-        self.is_waiting = False
-        self.is_extracting = False
 
     def __update(self):
         self.__download = get_download(self.__gid)
+        download = self.__download
+        if download.followed_by_ids:
+            self.__gid = download.followed_by_ids[0]
 
     def progress(self):
         """
@@ -75,12 +73,6 @@ class AriaDownloadStatus(Status):
     def download(self):
         return self
 
-    def updateName(self,name):
-        self.__name = name
-
-    def updateGid(self,gid):
-        self.__gid = gid
-
     def getListener(self):
         return self.__listener
     
@@ -95,12 +87,11 @@ class AriaDownloadStatus(Status):
         LOGGER.info(f"Cancelling Download: {self.name()}")
         download = self.aria_download()
         if download.is_waiting:
-            aria2.remove([download])
-            self.__listener.onDownloadError("Cancelled by user")
+            self.__listener.onDownloadError("★ 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗖𝗮𝗻𝗰𝗲𝗹𝗹𝗲𝗱 𝗕𝘆 𝗨𝘀𝗲𝗿!! ★")
+            aria2.remove([download], force=True)
             return
         if len(download.followed_by_ids) != 0:
             downloads = aria2.get_downloads(download.followed_by_ids)
-            aria2.remove(downloads)
-            self.__listener.onDownloadError("★ 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗖𝗮𝗻𝗰𝗲𝗹𝗹𝗲𝗱 𝗕𝘆 𝗨𝘀𝗲𝗿!! ★")
-        aria2.remove([download])
-        self.__listener.onDownloadError("★ 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗖𝗮𝗻𝗰𝗲𝗹𝗹𝗲𝗱 𝗕𝘆 𝗨𝘀𝗲𝗿!! ★")
+            aria2.remove(downloads, force=True)
+        self.__listener.onDownloadError('★ 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗖𝗮𝗻𝗰𝗲𝗹𝗹𝗲𝗱 𝗕𝘆 𝗨𝘀𝗲𝗿!! ★')
+        aria2.remove([download], force=True)
