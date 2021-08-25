@@ -2,6 +2,13 @@
 
 owner of this repo :- [AYUSH](https://github.com/ayushteke)
 
+
+all the commits are made from [slam-mirrorbot](https://github.com/SlamDevs/slam-mirrorbot)
+
+all the credit goes to [slamDevs](https://github.com/SlamDevs)
+
+
+
 contact me :- [AYUSH](https://t.me/request_ayush)
 
 # Slam Mirror Bot
