@@ -290,6 +290,26 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False):
             if i is not None:
                 file = i
                 break
+                
+        elif (
+              not bot_utils.is_url(link)
+              and not bot_utils.is_magnet(link)
+              or len(link) == 0
+        ) and file is None:
+            reply_text = reply_to.text
+            reply_text = re.split('\n ', reply_text)[0]
+            if bot_utils.is_url(reply_text) or bot_utils.is_magnet(reply_text):
+                link = reply_text
+
+    if bot_utils.is_url(link) and not bot_utils.is_magnet(link) and not os.path.exists(link) and isQbit:
+        resp = requests.get(link)
+        if resp.status_code == 200:
+            file_name = str(time.time()).replace(".", "") + ".torrent"
+            open(file_name, "wb").write(resp.content)
+            link = f"{file_name}"
+        else:
+            sendMessage("ERROR: link got HTTP response:" + resp.status_code, bot, update)
+            return
 
         if not bot_utils.is_url(link) and not bot_utils.is_magnet(link) or len(link) == 0:
             if file is not None:
@@ -306,10 +326,10 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False):
                     else:
                         link = file.get_file().file_path
 
-    if not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
+    elif not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
         sendMessage('No download source provided', bot, update)
         return
-    if not os.path.exists(link) and not bot_utils.is_mega_link(link) and not bot_utils.is_gdrive_link(link) and not bot_utils.is_magnet(link):
+    elif not os.path.exists(link) and not bot_utils.is_mega_link(link) and not bot_utils.is_gdrive_link(link) and not bot_utils.is_magnet(link):
         try:
             link = direct_link_generator(link)
         except DirectDownloadLinkException as e:
