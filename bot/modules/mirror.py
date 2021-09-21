@@ -291,7 +291,7 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False):
                 file = i
                 break
                 
-        elif (
+        if (
               not bot_utils.is_url(link)
               and not bot_utils.is_magnet(link)
               or len(link) == 0
