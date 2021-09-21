@@ -61,15 +61,14 @@ class MirrorListener(listeners.MirrorListeners):
             delete_all_messages()
         except IndexError:
             pass
-
     def onDownloadComplete(self):
         with download_dict_lock:
             LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
-            name = download.name()
+            name = f"{download.name()}".replace('/', '')
             gid = download.gid()
             size = download.size_raw()
-            if name is None or self.isQbit: # when pyrogram's media.file_name is of NoneType
+            if name == "None" or self.isQbit: # when pyrogram's media.file_name is of NoneType
                 name = os.listdir(f'{DOWNLOAD_DIR}{self.uid}')[0]
             m_path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
         if self.isTar:
