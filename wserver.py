@@ -205,7 +205,7 @@ input[type="submit"]:hover, input[type="submit"]:focus{
         </a>
       </div>
       <div class="social">
-        <a href="https://github.com/ayushteke/slam_aria_mirror_bot"><i class="fab fa-github"></i></a>
+        <a href="https://github.com/ayushteke/Torrent_2_Gdrive_mirrorbot"><i class="fab fa-github"></i></a>
         <a href="https://t.me/AT_BOTs"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
@@ -530,7 +530,7 @@ section span{
         </a>
       </div>
       <div class="social">
-        <a href="https://github.com/ayushteke/slam_aria_mirror_bot"><i class="fab fa-github"></i></a>
+        <a href="https://github.com/ayushteke/Torrent_2_Gdrive_mirrorbot"><i class="fab fa-github"></i></a>
         <a href="https://t.me/AT_BOTs"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
@@ -704,7 +704,7 @@ async def set_priority(request):
 @routes.get('/')
 async def homepage(request):
 
-    return web.Response(text="<h1>See AT_BOTs slam mirrorbot <a href='https://github.com/ayushteke/slam_aria_mirror_bot'>@GitHub</a> By <a href='https://github.com/ayushteke'></a></h1>", content_type="text/html")
+    return web.Response(text="<h1>See AT_BOTs slam mirrorbot <a href='https://github.com/ayushteke/Torrent_2_Gdrive_mirrorbot'>@GitHub</a> By <a href='https://github.com/ayushteke'></a></h1>", content_type="text/html")
 
 
 async def e404_middleware(app, handler):
@@ -730,7 +730,7 @@ async def start_server():
     return app
 
 
-async def start_server_async(port=8080):
+async def start_server_async(port=80):
 
     app = web.Application(middlewares=[e404_middleware])
     app.add_routes(routes)
