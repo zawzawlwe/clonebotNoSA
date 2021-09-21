@@ -5,6 +5,7 @@ import time
 import random
 import string
 import subprocess
+import requests
 
 import aria2p
 import qbittorrentapi as qba
@@ -33,9 +34,32 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 LOGGER = logging.getLogger(__name__)
 
+
+CONFIG_FILE_URL = os.environ.get('CONFIG_FILE_URL', None)
+if CONFIG_FILE_URL is not None:
+    res = requests.get(CONFIG_FILE_URL)
+    if res.status_code == 200:
+        with open('config.env', 'wb+') as f:
+            f.write(res.content)
+            f.close()
+    else:
+        logging.error(res.status_code)
+
 load_dotenv('config.env')
 
+
+SERVER_PORT = os.environ.get('SERVER_PORT', None)
+PORT = os.environ.get('PORT', SERVER_PORT)
+web = subprocess.Popen([f"gunicorn wserver:start_server --bind 0.0.0.0:{PORT} --worker-class aiohttp.GunicornWebWorker"], shell=True)
+time.sleep(1)
+alive = subprocess.Popen(["python3", "alive.py"])
+subprocess.run(["mkdir", "-p", "qBittorrent/config"])
+subprocess.run(["cp", "qBittorrent.conf", "qBittorrent/config/qBittorrent.conf"])
+subprocess.run(["qbittorrent-nox", "-d", "--profile=."])
 Interval = []
+DRIVES_NAMES = []
+DRIVES_IDS = []
+INDEX_URL = []
 
 
 def getConfig(name: str):
@@ -73,7 +97,7 @@ def get_client() -> qba.TorrentsAPIMixIn:
     qb_client = qba.Client(host="localhost", port=8090, username="admin", password="adminadmin")
     try:
         qb_client.auth_log_in()
-        qb_client.application.set_preferences({"disk_cache":64, "incomplete_files_ext":True, "max_connec":3000, "max_connec_per_torrent":300, "async_io_threads":32, "preallocate_all":True, "upnp":True, "dl_limit":-1, "up_limit":-1, "dht":True, "pex":True, "lsd":True, "encryption":0, "queueing_enabled":True, "max_active_downloads":15, "max_active_torrents":50, "dont_count_slow_torrents":True, "bittorrent_protocol":0, "recheck_completed_torrents":True, "enable_multi_connections_from_same_ip":True, "slow_torrent_dl_rate_threshold":100,"slow_torrent_inactive_timer":600})
+        qb_client.application.set_preferences({"disk_cache":64, "incomplete_files_ext":True, "max_connec":3000, "max_connec_per_torrent":300, "async_io_threads":8, "preallocate_all":True, "upnp":True, "dl_limit":-1, "up_limit":-1, "dht":True, "pex":True, "lsd":True, "encryption":0, "queueing_enabled":True, "max_active_downloads":15, "max_active_torrents":50, "dont_count_slow_torrents":True, "bittorrent_protocol":0, "recheck_completed_torrents":True, "enable_multi_connections_from_same_ip":True, "slow_torrent_dl_rate_threshold":100,"slow_torrent_inactive_timer":600})
         return qb_client
     except qba.LoginFailed as e:
         LOGGER.error(str(e))
@@ -129,8 +153,6 @@ try:
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
-    UPSTREAM_REPO = getConfig('UPSTREAM_REPO')
-    UPSTREAM_BRANCH = getConfig('UPSTREAM_BRANCH')
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
@@ -338,7 +360,7 @@ try:
     if len(BASE_URL) == 0:
         BASE_URL = None
 except KeyError:
-    logging.warning('BASE_URL_OF_BOT not provided!')
+    logging.warning('BASE_URL_OF_BOT not provided! Bot will get down soon....')
     BASE_URL = None
 
 try:
