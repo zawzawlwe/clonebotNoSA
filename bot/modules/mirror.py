@@ -65,7 +65,7 @@ class MirrorListener(listeners.MirrorListeners):
         with download_dict_lock:
             LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
-            name = f"{download.name()}".replace('/', '')
+            name = download.name().replace('/', '')
             gid = download.gid()
             size = download.size_raw()
             if name == "None" or self.isQbit: # when pyrogram's media.file_name is of NoneType
