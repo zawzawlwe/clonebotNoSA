@@ -1,7 +1,7 @@
 Give Star repo & then click on the below button 👇👇👇👇
 <p><a href="https://heroku.com/deploy?template=https://github.com/drzawlinmg/clonebotcredentialsnosa"> <img src="https://img.shields.io/badge/Deploy%20To%20Heroku-blueviolet?style=for-the-badge&logo=heroku" width="200""/></a></p>
     
-<p><a href="https://heroku.com/deploy?template=https://github.com/drzawlinmg/clonebotcredentialsnosa"> <img src="https://img.shields.io/badge/wikiapiary/:variant/installs/:name" width="200""/></a></p>
+<p><a href="https://heroku.com/deploy?template=https://github.com/drzawlinmg/clonebotcredentialsnosa"> <img src="https://telegra.ph/file/c032a3835d0e147ffa58e.jpg" width="200""/></a></p>
     
     		
 
