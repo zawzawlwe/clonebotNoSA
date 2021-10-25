@@ -1,3 +1,4 @@
+Give Star & then click on the below button 👇👇👇👇
 <p><a href="https://heroku.com/deploy?template=https://github.com/drzawlinmg/clonebotcredentialsnosa"> <img src="https://img.shields.io/badge/Deploy%20To%20Heroku-blueviolet?style=for-the-badge&logo=heroku" width="200""/></a></p>
 
 [![Slam](https://telegra.ph/file/019996f816db9ed576cff.jpg)](https://t.me/request_ayush)
@@ -15,16 +16,7 @@ contact me :- [AYUSH](https://t.me/request_ayush)
 
 # Slam Mirror Bot
 This is a telegram bot writen in python for mirroring files on the internet to our beloved Google Drive.
-
-## Deploying on Heroku
-Give Star & Fork this repo, then upload **token.pickle** & **credentials.json** to your forks
-
-
-after this click on the below button 👇👇👇👇
-<p><a href="https://github.com/ayushteke/Torrent_2_Gdrive_mirrorbot/blob/master/heroku-guide.md"> <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" /></a></p> 
-
-
-## Features supported:
+Features supported:
 
 - Mirroring direct download links to Google Drive
 - qBittorrent supported
